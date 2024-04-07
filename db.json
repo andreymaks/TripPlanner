@@ -1,0 +1,12 @@
+{
+  "trips": [
+    {
+      "id": "243b",
+      "name": "Warsaw"
+    },
+    {
+      "id": "a52e",
+      "name": "Amsterdam"
+    }
+  ]
+}
