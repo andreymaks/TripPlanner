@@ -2,11 +2,42 @@
   "trips": [
     {
       "id": "243b",
-      "name": "Warsaw"
+      "name": "Warsaw",
+      "transports": ["t1", "t2"]
     },
     {
       "id": "a52e",
-      "name": "Amsterdam"
+      "name": "Amsterdam",
+      "transports": ["t3"]
+    }
+  ],
+  "transports": [
+    {
+      "id": "t1",
+      "name": "Early plane",
+      "type": "plane",
+      "dateOfDeparture": "2024-05-01T10:00",
+      "duration": "02:30",
+      "from": "Berlin",
+      "to": "Warsaw"
+    },
+    {
+      "id": "t2",
+      "name": "Afternoon train",
+      "type": "train",
+      "dateOfDeparture": "2024-05-02T15:00",
+      "duration": "03:45",
+      "from": "Warsaw",
+      "to": "Krakow"
+    },
+    {
+      "id": "t3",
+      "name": "Early bus",
+      "type": "bus",
+      "dateOfDeparture": "2024-06-15T09:30",
+      "duration": "01:30",
+      "from": "Amsterdam Sloterdijk",
+      "to": "Utrecht Centraal"
     }
   ]
 }
