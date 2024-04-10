@@ -3,12 +3,26 @@
     {
       "id": "243b",
       "name": "Warsaw",
-      "transports": ["t1", "t2"]
+      "transports": [
+        "t2"
+      ],
+      "savedTransports": [
+        "t1"
+      ]
     },
     {
       "id": "a52e",
       "name": "Amsterdam",
-      "transports": ["t3"]
+      "transports": [
+        "t3"
+      ],
+      "savedTransports": []
+    },
+    {
+      "id": "b530",
+      "name": "Berlin",
+      "transports": [],
+      "savedTransports": []
     }
   ],
   "transports": [

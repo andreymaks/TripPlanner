@@ -1,13 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Typography, Box, List, ListItem, ListItemText, Divider } from '@mui/material';
-import { ExpandMore, ExpandLess } from '@mui/icons-material';
 
-const ListData = ({ data, name, onMoveItem }) => {
-    const [listVisible, setListVisible] = useState(false);
-
-    const handleDragStart = (e, item) => {
-        e.dataTransfer.setData("application/json", JSON.stringify(item));
-    };
+const LeftList = ({ data, name, onMoveItem }) => {
 
     const handleDrop = (e) => {
         e.preventDefault();
@@ -20,29 +14,30 @@ const ListData = ({ data, name, onMoveItem }) => {
             try {
                 const item = JSON.parse(jsonString);
                 // Proceed with handling the dropped item
-                onMoveItem(item, 'leftList', 'transports'); // or 'transports', depending on the component
+                onMoveItem(item, 'transports', 'leftList'); // or 'transports', depending on the component
             } catch (error) {
                 console.error("Error parsing JSON data:", error);
                 // Handle the error (e.g., ignore the drop or show an error message)
             }
         }
     };
+    
 
     const handleDragOver = (e) => {
         e.preventDefault();
     };
 
+    const handleDragStart = (e, item) => {
+        e.dataTransfer.setData("application/json", JSON.stringify(item));
+    };
+
+    
     return (
         <div onDrop={handleDrop} onDragOver={handleDragOver}>
-            <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => setListVisible(!listVisible)}>
-                <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                    {name}
-                </Typography>
-                <Box sx={{ transform: 'translateY(4px)' }}>
-                    {listVisible ? <ExpandLess /> : <ExpandMore />}
-                </Box>
-            </Box>
-            <List style={{ display: listVisible ? 'block' : 'none' }}>
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                {name}
+            </Typography>
+            <List style={{ display: 'block' }}>
                 {data.map((item) => (
                     <React.Fragment key={item.id}>
                         <ListItem draggable onDragStart={(e) => handleDragStart(e, item)}>
@@ -56,4 +51,4 @@ const ListData = ({ data, name, onMoveItem }) => {
     );
 };
 
-export default ListData;
+export default LeftList;

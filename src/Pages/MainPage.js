@@ -34,7 +34,7 @@ function MainPage() {
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({name: trip})
+            body: JSON.stringify({name: trip, transports: [], savedTransports: []})
           })
 
           if (!response.ok) {

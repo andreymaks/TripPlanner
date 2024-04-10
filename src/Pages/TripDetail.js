@@ -1,82 +1,104 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Typography, Box, List, ListItem, ListItemText, Divider } from '@mui/material';
-import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import { Typography, Box, Divider } from '@mui/material';
 import ListData from '../Components/ListData';
+import MyTab from '../Components/MyTab';
+import LeftList from '../Components/LeftList';
+
 
 
 const TripDetail = () => {
     const { tripId } = useParams();
     const [trip, setTrip] = useState(null);
+    // Adjust the states to handle drag and drop
     const [transports, setTransports] = useState([]);
-    const [transportListVisible, setTransportListVisible] = useState(false);
+    const [leftList, setLeftList] = useState([]);
 
-    useEffect (() => {
-        const fetchTrip = async () => {
+    // Function to move item from one list to another
+    const moveItem = (item, sourceType, destinationType) => {
+        // Initialize updated lists from the current state
+        let updatedSourceList = sourceType === 'transports' ? [...transports] : [...leftList];
+        let updatedDestinationList = destinationType === 'transports' ? [...transports] : [...leftList];
+    
+        // Find and remove the item from the source list
+        const itemIndex = updatedSourceList.findIndex((i) => i.id === item.id);
+        if (itemIndex > -1) {
+            const [removedItem] = updatedSourceList.splice(itemIndex, 1); // Remove item from source
+    
+            // Add the removed item to the destination list
+            updatedDestinationList.push(removedItem);
+    
+            // Update state based on the source and destination types
+            if (sourceType === 'transports') {
+                setTransports(updatedSourceList);
+            } else if (sourceType === 'leftList') {
+                setLeftList(updatedSourceList);
+            }
+    
+            if (destinationType === 'transports') {
+                setTransports(updatedDestinationList);
+            } else if (destinationType === 'leftList') {
+                setLeftList(updatedDestinationList);
+            }
+        }
+    };
+    
+    
+
+    useEffect(() => {
+        const fetchTripDetails = async () => {
             try {
-                const response = await fetch(`http://localhost:3001/trips/${tripId}`);
-                if (!response.ok) {
+                // Fetch the trip details
+                const tripResponse = await fetch(`http://localhost:3001/trips/${tripId}`);
+                if (!tripResponse.ok) {
                     throw new Error("Failed to fetch trip");
                 }
-                const data = await response.json();
-                setTrip(data);
-                return data.transports;
+                const trip = await tripResponse.json();
+                setTrip(trip);
+    
+                // Fetch transports directly associated with the trip
+                const transportPromises = trip.transports.map((transportId) =>
+                    fetch(`http://localhost:3001/transports/${transportId}`).then(res => res.json())
+                );
+
+                // Fetch transports directly associated with the trip
+                const savedTransportPromises = trip.savedTransports.map((transportId) =>
+                    fetch(`http://localhost:3001/transports/${transportId}`).then(res => res.json())
+                );
+    
+                
+    
+                // Wait for all transport data to be fetched
+                const transportsData = await Promise.all(transportPromises);
+                const savedTransportsData = await Promise.all(savedTransportPromises);
+    
+                // Update state with fetched data
+                setTransports(transportsData);
+                setLeftList(savedTransportsData);
             } catch (error) {
-                console.error("Error fetching trip:", error);
+                console.error("Error fetching trip details:", error);
             }
         };
-        fetchTrip().then((transportIds) => {
-            if (transportIds && transportIds.length > 0) {
-                const fetchTransport = async (transportId) => {
-                    try {
-                        const response = transportIds.map((transportId) => 
-                        fetch (`http://localhost:3001/transports/${transportId}`).then((res) => res.json())
-                        );
-                        const transportsData = await Promise.all(response);
-                        setTransports(transportsData);
-                    } catch (error) {
-                        console.error("Error fetching transport:", error);
-                    }
-                };
-                fetchTransport();
-            }
-        });
-        
-        
-    }, [tripId])
+    
+        fetchTripDetails();
+    }, [tripId]);
+    
 
     if (!trip) return <div>Loading...</div>
 
     return (
-        <Box sx={{display: 'flex', margin: '20px'}}>
-            {/* Left Part */}
-            <Box sx={{width: '75%'}}>
-                <Typography>Warsaw</Typography>
+        <>
+            <MyTab name={trip.name} />
+            <Box sx={{ display: 'flex', margin: '20px', height: '100vh' }}>
+                <Box sx={{ width: '75%' }}>
+                    <LeftList data={leftList} name="Left List" onMoveItem={moveItem} listType="leftList" />
+                </Box>
+                <Divider orientation="vertical" flexItem />
+                <Box sx={{ transform: 'translateX(6px)', width: '25%' }}>
+                    <ListData data={transports} name="Transports" onMoveItem={moveItem} listType="transports" />
+                </Box>
             </Box>
-
-            {/* Right Part */}
-            <Box sx={{width: '25%'}}>
-                {/* <Typography variant="h6" onClick={() => setTransportListVisible(!transportListVisible)}
-                sx={{cursor: 'pointer'}}>
-                    Transports
-                    {transportListVisible ? <ExpandLess /> : <ExpandMore />}
-                </Typography>
-                
-                {transportListVisible && (
-                    <List>
-                        {transports.map((transport) => (
-                            <React.Fragment key={transport.id}>
-                                <ListItem>
-                                    <ListItemText primary={transport.name}/>
-                                </ListItem>
-                                <Divider />
-                            </React.Fragment>
-                        ))}
-                    </List>
-                )} */}
-                <ListData data={transports} name="Transports"/> 
-            </Box>
-        </Box>
+        </>
     );
 };
 
