@@ -4,11 +4,11 @@
       "id": "243b",
       "name": "Warsaw",
       "transports": [
+        "dc37",
+        "t1",
         "t2"
       ],
-      "savedTransports": [
-        "t1"
-      ]
+      "savedTransports": []
     },
     {
       "id": "a52e",
@@ -33,7 +33,8 @@
       "dateOfDeparture": "2024-05-01T10:00",
       "duration": "02:30",
       "from": "Berlin",
-      "to": "Warsaw"
+      "to": "Warsaw",
+      "price": 80
     },
     {
       "id": "t2",
@@ -42,7 +43,8 @@
       "dateOfDeparture": "2024-05-02T15:00",
       "duration": "03:45",
       "from": "Warsaw",
-      "to": "Krakow"
+      "to": "Krakow",
+      "price": 60
     },
     {
       "id": "t3",
@@ -51,7 +53,18 @@
       "dateOfDeparture": "2024-06-15T09:30",
       "duration": "01:30",
       "from": "Amsterdam Sloterdijk",
-      "to": "Utrecht Centraal"
+      "to": "Utrecht Centraal",
+      "price": 35
+    },
+    {
+      "id": "dc37",
+      "name": "A bus",
+      "type": "bus",
+      "dateOfDeparture": "2024-04-11T17:10",
+      "duration": "11:30",
+      "from": "Krakow",
+      "to": "Warsaw",
+      "price": "30"
     }
   ]
 }

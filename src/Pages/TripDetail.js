@@ -4,18 +4,19 @@ import { Typography, Box, Divider } from '@mui/material';
 import ListData from '../Components/ListData';
 import MyTab from '../Components/MyTab';
 import LeftList from '../Components/LeftList';
+import AddTransport from '../Components/AddTransport';
 
 
 
 const TripDetail = () => {
     const { tripId } = useParams();
     const [trip, setTrip] = useState(null);
-    // Adjust the states to handle drag and drop
     const [transports, setTransports] = useState([]);
     const [leftList, setLeftList] = useState([]);
+    const [openTransport, setOpenTransport] = useState(false);
 
     // Function to move item from one list to another
-    const moveItem = (item, sourceType, destinationType) => {
+    const moveItem = async (item, sourceType, destinationType) => {
         // Initialize updated lists from the current state
         let updatedSourceList = sourceType === 'transports' ? [...transports] : [...leftList];
         let updatedDestinationList = destinationType === 'transports' ? [...transports] : [...leftList];
@@ -27,18 +28,35 @@ const TripDetail = () => {
     
             // Add the removed item to the destination list
             updatedDestinationList.push(removedItem);
+
     
             // Update state based on the source and destination types
             if (sourceType === 'transports') {
                 setTransports(updatedSourceList);
+                setLeftList(updatedDestinationList);
+
             } else if (sourceType === 'leftList') {
                 setLeftList(updatedSourceList);
-            }
-    
-            if (destinationType === 'transports') {
                 setTransports(updatedDestinationList);
-            } else if (destinationType === 'leftList') {
-                setLeftList(updatedDestinationList);
+            }
+
+            const updatedTrip = {
+                transports: sourceType === 'transports' ? updatedSourceList.map(item => item.id) :
+                updatedDestinationList.map(item => item.id),
+                savedTransports: sourceType === 'transports' ? updatedDestinationList.map(item => item.id) : 
+                updatedSourceList.map(item => item.id)
+            }
+
+            try {
+                await fetch(`http://localhost:3001/trips/${tripId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedTrip),
+                });
+            } catch (error) {
+                console.error("Error updating trip:", error);
             }
         }
     };
@@ -82,6 +100,52 @@ const TripDetail = () => {
     
         fetchTripDetails();
     }, [tripId]);
+
+    const handleAddTransport = async (transport) => {
+        try{
+            const response = await fetch('http://localhost:3001/transports', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({name: transport.name, type: transport.type, dateOfDeparture: transport.dateOfDeparture,
+            duration: transport.duration, from: transport.from, to: transport.to, price: transport.price})
+          })
+
+          if (!response.ok) {
+            throw new Error('Failed to add new trip');
+          }
+
+          const newTransport = await response.json();
+
+          setTransports((prevTransports) => [...prevTransports, newTransport]);
+
+          const updatedTrip = {transports: transports.map(t => t.id)}
+          try {
+            await fetch(`http://localhost:3001/trips/${tripId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedTrip),
+            });
+            } catch (error) {
+                console.error("Error updating trip:", error);
+            }
+        } catch (error) {
+            console.error("Error adding new transport:", error);
+        }
+        
+        handleCloseTransport();
+    };
+
+    const handleClickOpenTransport = () => {
+        setOpenTransport(true);
+    };
+
+    const handleCloseTransport = () => {
+        setOpenTransport(false);
+    };
     
 
     if (!trip) return <div>Loading...</div>
@@ -95,9 +159,11 @@ const TripDetail = () => {
                 </Box>
                 <Divider orientation="vertical" flexItem />
                 <Box sx={{ transform: 'translateX(6px)', width: '25%' }}>
-                    <ListData data={transports} name="Transports" onMoveItem={moveItem} listType="transports" />
+                    <ListData data={transports} name="Transports" onMoveItem={moveItem}
+                    onOpen={handleClickOpenTransport} listType="transports" />
                 </Box>
             </Box>
+            <AddTransport open={openTransport} onClose={handleCloseTransport} onAdd={handleAddTransport}/>
         </>
     );
 };

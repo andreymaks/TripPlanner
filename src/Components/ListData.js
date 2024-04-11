@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Typography, Box, List, ListItem, ListItemText, Divider } from '@mui/material';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import InfoIcon from '@mui/icons-material/Info';
 
-const ListData = ({ data, name, onMoveItem }) => {
+const ListData = ({ data, name, onMoveItem, onOpen }) => {
     const [listVisible, setListVisible] = useState(false);
 
     const handleDragStart = (e, item) => {
@@ -45,12 +47,19 @@ const ListData = ({ data, name, onMoveItem }) => {
             <List style={{ display: listVisible ? 'block' : 'none' }}>
                 {data.map((item) => (
                     <React.Fragment key={item.id}>
-                        <ListItem draggable onDragStart={(e) => handleDragStart(e, item)}>
-                            <ListItemText primary={item.name} />
+                        <ListItem sx={{display: 'flex', flexDirection: 'row'}}
+                         draggable onDragStart={(e) => handleDragStart(e, item)}>
+                            <ListItemText primary={item.name} /> <InfoIcon/>
                         </ListItem>
                         <Divider />
                     </React.Fragment>
                 ))}
+                <React.Fragment >
+                    <ListItem sx={{display: 'flex', flexDirection: 'row', cursor: 'pointer'}} onClick={onOpen}>
+                        <ListItemText primary="New transport" /> <AddCircleIcon />
+                    </ListItem>
+                    <Divider />
+                </React.Fragment>
             </List>
         </div>
     );
