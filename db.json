@@ -4,9 +4,8 @@
       "id": "243b",
       "name": "Warsaw",
       "transports": [
-        "dc37",
-        "t1",
-        "t2"
+        "t2",
+        "t1"
       ],
       "savedTransports": []
     },
@@ -27,14 +26,14 @@
   ],
   "transports": [
     {
-      "id": "t1",
       "name": "Early plane",
       "type": "plane",
       "dateOfDeparture": "2024-05-01T10:00",
       "duration": "02:30",
       "from": "Berlin",
       "to": "Warsaw",
-      "price": 80
+      "price": "120",
+      "id": "t1"
     },
     {
       "id": "t2",
@@ -55,16 +54,6 @@
       "from": "Amsterdam Sloterdijk",
       "to": "Utrecht Centraal",
       "price": 35
-    },
-    {
-      "id": "dc37",
-      "name": "A bus",
-      "type": "bus",
-      "dateOfDeparture": "2024-04-11T17:10",
-      "duration": "11:30",
-      "from": "Krakow",
-      "to": "Warsaw",
-      "price": "30"
     }
   ]
 }

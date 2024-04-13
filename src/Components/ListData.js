@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Typography, Box, List, ListItem, ListItemText, Divider } from '@mui/material';
+import { Typography, Box, List, ListItem, ListItemText, Divider, Fab } from '@mui/material';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import InfoIcon from '@mui/icons-material/Info';
 
-const ListData = ({ data, name, onMoveItem, onOpen }) => {
+const ListData = ({ data, name, onMoveItem, onOpenSave, onOpenInfo }) => {
     const [listVisible, setListVisible] = useState(false);
 
     const handleDragStart = (e, item) => {
@@ -49,13 +49,16 @@ const ListData = ({ data, name, onMoveItem, onOpen }) => {
                     <React.Fragment key={item.id}>
                         <ListItem sx={{display: 'flex', flexDirection: 'row'}}
                          draggable onDragStart={(e) => handleDragStart(e, item)}>
-                            <ListItemText primary={item.name} /> <InfoIcon/>
+                            <ListItemText primary={item.name} /> 
+                            <Fab color="primary"  size="small" onClick={() => onOpenInfo(item)}>
+                                <InfoIcon/>
+                            </Fab>
                         </ListItem>
                         <Divider />
                     </React.Fragment>
                 ))}
                 <React.Fragment >
-                    <ListItem sx={{display: 'flex', flexDirection: 'row', cursor: 'pointer'}} onClick={onOpen}>
+                    <ListItem sx={{display: 'flex', flexDirection: 'row', cursor: 'pointer'}} onClick={()=>onOpenSave()}>
                         <ListItemText primary="New transport" /> <AddCircleIcon />
                     </ListItem>
                     <Divider />
