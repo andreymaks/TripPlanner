@@ -32,7 +32,7 @@
       "duration": "02:30",
       "from": "Berlin",
       "to": "Warsaw",
-      "price": "120",
+      "price": "100",
       "id": "t1"
     },
     {
@@ -43,7 +43,7 @@
       "duration": "03:45",
       "from": "Warsaw",
       "to": "Krakow",
-      "price": 60
+      "price": "80"
     },
     {
       "id": "t3",

@@ -7,12 +7,13 @@ import LeftList from "../Components/LeftList";
 import SaveTransport from "../Components/SaveTransport";
 import InfoTransport from "../Components/InfoTransport";
 import useOpenClose from "../Functions/useOpenClose";
+import { useTripDetails } from "../Functions/useTripDetails";
+import { apiCall } from "../Functions/apiCall";
 
 const TripDetail = () => {
   const { tripId } = useParams();
-  const [trip, setTrip] = useState(null);
-  const [transports, setTransports] = useState([]);
-  const [leftList, setLeftList] = useState([]);
+  const { trip, transports, setTransports, leftList, setLeftList } =
+    useTripDetails(tripId);
   const [openTransport, handleOpenTransport, handleCloseTransport] =
     useOpenClose();
   const [openInfoTransport, handleOpenInfoTransport, handleCloseInfoTransport] =
@@ -62,86 +63,21 @@ const TripDetail = () => {
             ? updatedDestinationList.map((item) => item.id)
             : updatedSourceList.map((item) => item.id),
       };
-
-      try {
-        await fetch(`http://localhost:3001/trips/${tripId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedTrip),
-        });
-      } catch (error) {
-        console.error("Error updating trip:", error);
-      }
+      await apiCall(
+        `http://localhost:3001/trips/${tripId}`,
+        "PATCH",
+        updatedTrip
+      );
     }
   };
 
-  useEffect(() => {
-    const fetchTripDetails = async () => {
-      try {
-        // Fetch the trip details
-        const tripResponse = await fetch(
-          `http://localhost:3001/trips/${tripId}`
-        );
-        if (!tripResponse.ok) {
-          throw new Error("Failed to fetch trip");
-        }
-        const trip = await tripResponse.json();
-        setTrip(trip);
-
-        // Fetch transports directly associated with the trip
-        const transportPromises = trip.transports.map((transportId) =>
-          fetch(`http://localhost:3001/transports/${transportId}`).then((res) =>
-            res.json()
-          )
-        );
-
-        // Fetch transports directly associated with the trip
-        const savedTransportPromises = trip.savedTransports.map((transportId) =>
-          fetch(`http://localhost:3001/transports/${transportId}`).then((res) =>
-            res.json()
-          )
-        );
-
-        // Wait for all transport data to be fetched
-        const transportsData = await Promise.all(transportPromises);
-        const savedTransportsData = await Promise.all(savedTransportPromises);
-
-        // Update state with fetched data
-        setTransports(transportsData);
-        setLeftList(savedTransportsData);
-      } catch (error) {
-        console.error("Error fetching trip details:", error);
-      }
-    };
-
-    fetchTripDetails();
-  }, [tripId]);
-
   const handleSaveTransport = async (transport) => {
     try {
-      const response = await fetch("http://localhost:3001/transports", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: transport.name,
-          type: transport.type,
-          dateOfDeparture: transport.dateOfDeparture,
-          duration: transport.duration,
-          from: transport.from,
-          to: transport.to,
-          price: transport.price,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to add new trip");
-      }
-
-      const newTransport = await response.json();
+      const newTransport = await apiCall(
+        "http://localhost:3001/transports",
+        "POST",
+        transport
+      );
       setTransports((prevTransports) => [...prevTransports, newTransport]);
     } catch (error) {
       console.error("Error adding new transport:", error);
@@ -151,21 +87,11 @@ const TripDetail = () => {
 
   const handleDeleteTransport = async (transport) => {
     try {
-      const response = await fetch(
+      await apiCall(
         `http://localhost:3001/transports/${transport.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        "DELETE"
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to delte transport");
-      }
-      const updatedTransports = transports.filter((t) => t.id !== transport.id);
-      setTransports(updatedTransports);
+      setTransports(transports.filter((t) => t.id !== transport.id));
     } catch (error) {
       console.error("Error deleting a transport:", error);
     }
@@ -175,38 +101,16 @@ const TripDetail = () => {
 
   const handleEditTransport = async (transport) => {
     try {
-      const response = await fetch(
+      const updatedTransport = await apiCall(
         `http://localhost:3001/transports/${transport.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: transport.name,
-            type: transport.type,
-            dateOfDeparture: transport.dateOfDeparture,
-            duration: transport.duration,
-            from: transport.from,
-            to: transport.to,
-            price: transport.price,
-          }),
-        }
+        "PUT",
+        transport
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to change transport");
-      }
-
-      const updatedTransport = await response.json();
-
       setTransports((prevTransports) =>
         prevTransports.map((t) =>
           t.id === transport.id ? updatedTransport : t
         )
       );
-      // const newTransport = await response.json();
-      // setTransports((prevTransports) => [...prevTransports, newTransport]);
     } catch (error) {
       console.error("Error editing transport:", error);
     }
@@ -218,17 +122,11 @@ const TripDetail = () => {
     if (transports.length === 0) return;
     const updateTrip = async () => {
       const updatedTrip = { transports: transports.map((t) => t.id) };
-      try {
-        await fetch(`http://localhost:3001/trips/${tripId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedTrip),
-        });
-      } catch (error) {
-        console.error("Error updating trip:", error);
-      }
+      await apiCall(
+        `http://localhost:3001/trips/${tripId}`,
+        "PATCH",
+        updatedTrip
+      );
     };
 
     updateTrip();
@@ -254,7 +152,18 @@ const TripDetail = () => {
             data={transports}
             name="Transports"
             onMoveItem={moveItem}
-            onOpenSave={handleOpenTransport}
+            onOpenSave={() => {
+              setSelectedTransport({
+                name: "",
+                type: "",
+                dateOfDeparture: "",
+                duration: "",
+                from: "",
+                to: "",
+                price: "",
+              });
+              handleOpenTransport();
+            }}
             onOpenInfo={(transport) => {
               setSelectedTransport(transport);
               handleOpenInfoTransport();
