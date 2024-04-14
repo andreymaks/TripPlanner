@@ -12,8 +12,19 @@ import { apiCall } from "../Functions/apiCall";
 
 const TripDetail = () => {
   const { tripId } = useParams();
-  const { trip, transports, setTransports, leftList, setLeftList } =
-    useTripDetails(tripId);
+  const {
+    trip,
+    transports,
+    setTransports,
+    savedTransports,
+    setSavedTransports,
+    living,
+    setLiving,
+    savedLiving,
+    setSavedLiving,
+    leftList,
+    setLeftList,
+  } = useTripDetails(tripId);
   const [openTransport, handleOpenTransport, handleCloseTransport] =
     useOpenClose();
   const [openInfoTransport, handleOpenInfoTransport, handleCloseInfoTransport] =
@@ -27,51 +38,72 @@ const TripDetail = () => {
     to: "",
     price: "",
   });
-
-  // Function to move item from one list to another
-  const moveItem = async (item, sourceType, destinationType) => {
-    // Initialize updated lists from the current state
-    let updatedSourceList =
-      sourceType === "transports" ? [...transports] : [...leftList];
-    let updatedDestinationList =
-      destinationType === "transports" ? [...transports] : [...leftList];
-
-    // Find and remove the item from the source list
-    const itemIndex = updatedSourceList.findIndex((i) => i.id === item.id);
-    if (itemIndex > -1) {
-      const [removedItem] = updatedSourceList.splice(itemIndex, 1); // Remove item from source
-
-      // Add the removed item to the destination list
-      updatedDestinationList.push(removedItem);
-
-      // Update state based on the source and destination types
-      if (sourceType === "transports") {
-        setTransports(updatedSourceList);
-        setLeftList(updatedDestinationList);
-      } else if (sourceType === "leftList") {
-        setLeftList(updatedSourceList);
-        setTransports(updatedDestinationList);
-      }
-
-      const updatedTrip = {
-        transports:
-          sourceType === "transports"
-            ? updatedSourceList.map((item) => item.id)
-            : updatedDestinationList.map((item) => item.id),
-        savedTransports:
-          sourceType === "transports"
-            ? updatedDestinationList.map((item) => item.id)
-            : updatedSourceList.map((item) => item.id),
-      };
-      await apiCall(
-        `http://localhost:3001/trips/${tripId}`,
-        "PATCH",
-        updatedTrip
-      );
-    }
+  const listMapping = {
+    transports: {
+      data: transports,
+      setData: setTransports,
+    },
+    savedTransports: {
+      data: savedTransports,
+      setData: setSavedTransports,
+    },
+    living: {
+      data: living,
+      setData: setLiving,
+    },
+    savedLiving: {
+      data: savedLiving,
+      setData: setSavedLiving,
+    },
   };
 
+  // Function to move item from one list to another
+  const moveItem = async (item, from, to) => {
+    // Update source list
+    console.log(from, to);
+    listMapping[from].setData((prevSourceList) => {
+      return prevSourceList.filter((i) => i.id !== item.id);
+    });
+
+    // Update destination list
+    listMapping[to].setData((prevDestinationList) => {
+      return [...prevDestinationList, item];
+    });
+  };
+
+  useEffect(() => {
+    const updateTrip = async () => {
+      const updatedTrip = {
+        transports: transports.map((t) => t.id),
+        savedTransports: savedTransports.map((st) => st.id),
+        living: living.map((l) => l.id),
+        savedLiving: savedLiving.map((sl) => sl.id),
+      };
+
+      try {
+        await apiCall(
+          `http://localhost:3001/trips/${tripId}`,
+          "PATCH",
+          updatedTrip
+        );
+      } catch (error) {
+        console.error("Error updating the trip:", error);
+      }
+    };
+
+    // Call updateTrip if there's relevant data
+    if (
+      transports.length > 0 ||
+      savedTransports.length > 0 ||
+      living.length > 0 ||
+      savedLiving.length > 0
+    ) {
+      updateTrip();
+    }
+  }, [transports, savedTransports, living, savedLiving, tripId]);
+
   const handleSaveTransport = async (transport) => {
+    transport.category = "transports";
     try {
       const newTransport = await apiCall(
         "http://localhost:3001/transports",
@@ -119,18 +151,16 @@ const TripDetail = () => {
   };
 
   useEffect(() => {
-    if (transports.length === 0) return;
-    const updateTrip = async () => {
-      const updatedTrip = { transports: transports.map((t) => t.id) };
-      await apiCall(
-        `http://localhost:3001/trips/${tripId}`,
-        "PATCH",
-        updatedTrip
-      );
-    };
+    setLeftList([...savedTransports, ...savedLiving]);
+  }, [savedTransports, savedLiving]);
 
-    updateTrip();
+  useEffect(() => {
+    setTransports(transports);
   }, [transports]);
+
+  useEffect(() => {
+    setLiving(living);
+  }, [living]);
 
   if (!trip) return <div>Loading...</div>;
 
@@ -168,6 +198,29 @@ const TripDetail = () => {
               setSelectedTransport(transport);
               handleOpenInfoTransport();
             }}
+          />
+          <ListData
+            data={living}
+            name="Living"
+            onMoveItem={moveItem}
+            // onOpenSave={() => {
+            //   setSelectedTransport({
+            //     name: "",
+            //     type: "",
+            //     dateOfDeparture: "",
+            //     duration: "",
+            //     from: "",
+            //     to: "",
+            //     price: "",
+            //   });
+            //   handleOpenTransport();
+            // }}
+            onOpenSave={() => {}}
+            // onOpenInfo={(transport) => {
+            //   setSelectedTransport(transport);
+            //   handleOpenInfoTransport();
+            // }}
+            onOpenInfo={() => {}}
           />
         </Box>
       </Box>

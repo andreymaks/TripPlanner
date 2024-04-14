@@ -3,11 +3,16 @@
     {
       "id": "243b",
       "name": "Warsaw",
-      "transports": [
-        "t2",
+      "transports": [],
+      "savedTransports": [
         "t1"
       ],
-      "savedTransports": []
+      "living": [
+        "l2"
+      ],
+      "savedLiving": [
+        "l1"
+      ]
     },
     {
       "id": "a52e",
@@ -15,13 +20,17 @@
       "transports": [
         "t3"
       ],
-      "savedTransports": []
+      "savedTransports": [],
+      "living": [],
+      "savedLiving": []
     },
     {
       "id": "b530",
       "name": "Berlin",
       "transports": [],
-      "savedTransports": []
+      "savedTransports": [],
+      "living": [],
+      "savedLiving": []
     }
   ],
   "transports": [
@@ -33,7 +42,8 @@
       "from": "Berlin",
       "to": "Warsaw",
       "price": "100",
-      "id": "t1"
+      "id": "t1",
+      "category": "transports"
     },
     {
       "id": "t2",
@@ -43,7 +53,8 @@
       "duration": "03:45",
       "from": "Warsaw",
       "to": "Krakow",
-      "price": "80"
+      "price": "80",
+      "category": "transports"
     },
     {
       "id": "t3",
@@ -53,7 +64,26 @@
       "duration": "01:30",
       "from": "Amsterdam Sloterdijk",
       "to": "Utrecht Centraal",
-      "price": 35
+      "price": 35,
+      "category": "transports"
+    }
+  ],
+  "living": [
+    {
+      "id": "l1",
+      "name": "Hotel Atlas",
+      "from": "2024-06-15",
+      "to": "2024-6-22",
+      "price": "500",
+      "category": "living"
+    },
+    {
+      "id": "l2",
+      "name": "Hotel Mercury",
+      "from": "2024-06-15",
+      "to": "2024-6-22",
+      "price": "500",
+      "category": "living"
     }
   ]
 }

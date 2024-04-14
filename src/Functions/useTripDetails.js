@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import LeftList from "../Components/LeftList";
 
 const fetchData = async (url, options) => {
   const response = await fetch(url, options);
@@ -9,6 +10,9 @@ const fetchData = async (url, options) => {
 export const useTripDetails = (tripId) => {
   const [trip, setTrip] = useState(null);
   const [transports, setTransports] = useState([]);
+  const [savedTransports, setSavedTransports] = useState([]);
+  const [living, setLiving] = useState([]);
+  const [savedLiving, setSavedLiving] = useState([]);
   const [leftList, setLeftList] = useState([]);
 
   useEffect(() => {
@@ -26,12 +30,28 @@ export const useTripDetails = (tripId) => {
         );
         setTransports(transportsData);
 
-        const leftListData = await Promise.all(
+        const livingData = await Promise.all(
+          tripDetails.living.map((id) =>
+            fetchData(`http://localhost:3001/living/${id}`)
+          )
+        );
+        setLiving(livingData);
+
+        const savedTransportsData = await Promise.all(
           tripDetails.savedTransports.map((id) =>
             fetchData(`http://localhost:3001/transports/${id}`)
           )
         );
-        setLeftList(leftListData);
+        setSavedTransports(savedTransportsData);
+
+        const savedLivingData = await Promise.all(
+          tripDetails.savedLiving.map((id) =>
+            fetchData(`http://localhost:3001/living/${id}`)
+          )
+        );
+        setSavedLiving(savedLivingData);
+
+        setLeftList([...savedTransports, ...savedLiving]);
       } catch (error) {
         console.error("Error fetching trip details:", error);
       }
@@ -40,5 +60,17 @@ export const useTripDetails = (tripId) => {
     loadTripData();
   }, [tripId]);
 
-  return { trip, transports, setTransports, leftList, setLeftList };
+  return {
+    trip,
+    transports,
+    setTransports,
+    savedTransports,
+    setSavedTransports,
+    living,
+    setLiving,
+    savedLiving,
+    setSavedLiving,
+    leftList,
+    setLeftList,
+  };
 };
